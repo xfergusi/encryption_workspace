@@ -1,52 +1,54 @@
+const assert = require('node:assert');
+
+const {
+  createDiffieHellman,
+} = require('node:crypto');
+
+// Generate Alice's keys...
+const alice = createDiffieHellman(256);
+const aliceKey = alice.generateKeys();
+
+// Generate Bob's keys...
+const bob = createDiffieHellman(alice.getPrime(), alice.getGenerator());
+const bobKey = bob.generateKeys();
+
+// Exchange and generate the secret...
+const aliceSecret = alice.computeSecret(bobKey);
+const bobSecret = bob.computeSecret(aliceKey);
+
+// OK
+assert.strictEqual(aliceSecret.toString('hex'), bobSecret.toString('hex'));
+
 const crypto = require("crypto");
 
-// // The `generateKeyPairSync` method accepts two arguments:
-// // 1. The type ok keys we want, which in this case is "rsa"
-// // 2. An object with the properties of the key
-// const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
-//   // The standard secure default length for RSA keys is 2048 bits
-//   modulusLength: 2048,
-// });
-// // This is the data we want to encrypt
-// const data = "my secret data";
+const algorithm = "aes-256-cbc"; 
 
-// const encryptedData = crypto.publicEncrypt(
-//   {
-//     key: publicKey,
-//     padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-//     oaepHash: "sha256",
-//   },
-//   // We convert the data string to a buffer using `Buffer.from`
-//   Buffer.from(data)
-// );
+// generate 16 bytes of random data
+const initVector = crypto.randomBytes(16);
 
-// // The encrypted data is in the form of bytes, so we print it in base64 format
-// // so that it's displayed in a more readable form
-// console.log("encypted data: ", encryptedData.toString("base64"));
+// protected data
+const message = "This is a secret message";
 
-const fs = require('fs');
-privateKey = fs.readFileSync('/Users/ian/Desktop/keys/privateKey.pem', {encoding:'utf8'})
-
-let encryptedData = fs.readFileSync('/Users/ian/Desktop/encrypted_data', null)
-
-console.log(privateKey)
-
-// console.log(fr.readAsBinaryString("/Users/ian/Desktop/keys/publicKey.pem"));
+console.log(aliceSecret.toString('hex').length);
+console.log(aliceSecret.byteLength);
 
 
-const decryptedData = crypto.privateDecrypt(
-    {
-      key: privateKey,
-      // In order to decrypt the data, we need to specify the
-      // same hashing function and padding scheme that we used to
-      // encrypt the data in the previous step
-      padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-      // padding: crypto.constants.RSA_PKCS1_PADDING,
-      oaepHash: "sha256",
-    },
-    Buffer.from(encryptedData, 'base64')
-  );
-  
-  // The decrypted data is of the Buffer type, which we can convert to a
-  // string to reveal the original data
-  console.log("decrypted data: ", decryptedData.toString());
+
+
+// the cipher function
+const cipher = crypto.createCipheriv(algorithm, aliceSecret, initVector);
+
+// encrypt the message
+// input encoding
+// output encoding
+let encryptedData = cipher.update(message, "utf-8", "hex");
+encryptedData += cipher.final("hex");
+console.log("Encrypted message: " + encryptedData);
+
+const decipher = crypto.createDecipheriv(algorithm, aliceSecret, initVector);
+
+let decryptedData = decipher.update(encryptedData, "hex", "utf-8");
+
+decryptedData += decipher.final("utf8");
+
+console.log("Decrypted message: " + decryptedData);
