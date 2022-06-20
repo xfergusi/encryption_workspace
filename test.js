@@ -27,13 +27,10 @@ const algorithm = "aes-256-cbc";
 const initVector = crypto.randomBytes(16);
 
 // protected data
-const message = "This is a secret message";
+const message = "testing attention please";
 
-console.log(aliceSecret.toString('hex').length);
-console.log(aliceSecret.byteLength);
-
-
-
+console.log("initVector: " + initVector.toString('hex'))
+console.log("secret in hex: " + aliceSecret.toString('hex'));
 
 // the cipher function
 const cipher = crypto.createCipheriv(algorithm, aliceSecret, initVector);
