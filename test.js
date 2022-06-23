@@ -56,3 +56,5 @@ let decryptedData = decipher.update(encryptedData, "hex", "utf-8");
 decryptedData += decipher.final("utf8");
 
 console.log("Decrypted message: " + decryptedData);
+
+//OK, now that you've run this code, you can copy and past the important bits into the python and .net code and have yourself some encryption
